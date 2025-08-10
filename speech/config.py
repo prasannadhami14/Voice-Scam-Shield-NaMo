@@ -6,7 +6,7 @@ import os
 def load_keywords_from_json(filepath: str) -> Set[str]:
     """Load keywords from a JSON file using a path relative to this file."""
     base_dir = os.path.dirname(__file__)
-    abs_path = os.path.join(base_dir, filepath)
+    abs_path = os.path.join(base_dir, "keywords", filepath)
     with open(abs_path, "r", encoding="utf-8") as f:
         keywords = json.load(f)
     # Filter out generic keywords to reduce false positives
@@ -43,9 +43,14 @@ class StreamingConfig:
     device: str = "auto"  # one of: "metal", "cpu", "auto"
     compute_type: str = "int8"  # e.g., "int8", "int8_float16", "float16", "float32"
     use_fp16: bool = False
+    beam_size: int = 5
     duration_limit_seconds: float = 0.0
     # If set, force transcription to this language code (e.g., "hi", "en")
     force_language: str | None = None
+    # Restrict output to these languages; if detection yields other languages, we remap/re-run
+    allowed_languages: tuple[str, ...] = ("en", "ne", "hi", "es", "sa", "fr")
+    # Prefer Nepali over Hindi when strong Devanagari evidence
+    prefer_nepali_over_hindi: bool = True
     # When True, automatically lock language based on script detection (e.g., Devanagari → "hi")
     auto_language_lock: bool = True
     # Threshold (0..1) of script ratio to trigger auto lock for a language (e.g., Devanagari for Hindi)

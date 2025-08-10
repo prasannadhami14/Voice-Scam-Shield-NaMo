@@ -1,0 +1,202 @@
+[
+  {
+    "transcript": "Hello",
+    "risk": 80,
+    "label": "Scam",
+    "rationale": "Heuristic: short marketing-like utterance",
+    "language": "en",
+    "advice": "This is a scam call. Be aware.",
+    "processing_time": 0.6724982261657715,
+    "file": "test_audio_english/non_scam_01.wav"
+  },
+  {
+    "transcript": "How are you?",
+    "risk": 80,
+    "label": "Scam",
+    "rationale": "Heuristic: short marketing-like utterance",
+    "language": "en",
+    "advice": "This is a scam call. Be aware.",
+    "processing_time": 0.6182670593261719,
+    "file": "test_audio_english/non_scam_02.wav"
+  },
+  {
+    "transcript": "I like music.",
+    "risk": 80,
+    "label": "Scam",
+    "rationale": "Heuristic: short marketing-like utterance",
+    "language": "en",
+    "advice": "This is a scam call. Be aware.",
+    "processing_time": 0.6270499229431152,
+    "file": "test_audio_english/non_scam_03.wav"
+  },
+  {
+    "transcript": "It's nice weather today.",
+    "risk": 0,
+    "label": "Safe",
+    "rationale": "No scam keywords detected",
+    "language": "en",
+    "advice": "This call appears safe.",
+    "processing_time": 0.6364152431488037,
+    "file": "test_audio_english/non_scam_04.wav"
+  },
+  {
+    "transcript": "I'm going to school.",
+    "risk": 0,
+    "label": "Safe",
+    "rationale": "No scam keywords detected",
+    "language": "en",
+    "advice": "This call appears safe.",
+    "processing_time": 0.6420741081237793,
+    "file": "test_audio_english/non_scam_05.wav"
+  },
+  {
+    "transcript": "I have a pet.",
+    "risk": 0,
+    "label": "Safe",
+    "rationale": "No scam keywords detected",
+    "language": "en",
+    "advice": "This call appears safe.",
+    "processing_time": 0.6415441036224365,
+    "file": "test_audio_english/non_scam_06.wav"
+  },
+  {
+    "transcript": "The food is delicious.",
+    "risk": 0,
+    "label": "Safe",
+    "rationale": "No scam keywords detected",
+    "language": "en",
+    "advice": "This call appears safe.",
+    "processing_time": 0.634890079498291,
+    "file": "test_audio_english/non_scam_07.wav"
+  },
+  {
+    "transcript": "I want to learn English.",
+    "risk": 0,
+    "label": "Safe",
+    "rationale": "No scam keywords detected",
+    "language": "en",
+    "advice": "This call appears safe.",
+    "processing_time": 0.6445677280426025,
+    "file": "test_audio_english/non_scam_08.wav"
+  },
+  {
+    "transcript": "The cinema is closed.",
+    "risk": 0,
+    "label": "Safe",
+    "rationale": "No scam keywords detected",
+    "language": "en",
+    "advice": "This call appears safe.",
+    "processing_time": 0.6395790576934814,
+    "file": "test_audio_english/non_scam_09.wav"
+  },
+  {
+    "transcript": "See you tomorrow.",
+    "risk": 80,
+    "label": "Scam",
+    "rationale": "Heuristic: short marketing-like utterance",
+    "language": "en",
+    "advice": "This is a scam call. Be aware.",
+    "processing_time": 0.6286940574645996,
+    "file": "test_audio_english/non_scam_10.wav"
+  },
+  {
+    "transcript": "Eliminate dirt.",
+    "risk": 80,
+    "label": "Scam",
+    "rationale": "Heuristic: short marketing-like utterance",
+    "language": "en",
+    "advice": "This is a scam call. Be aware.",
+    "processing_time": 0.6430079936981201,
+    "file": "test_audio_english/scam_01.wav"
+  },
+  {
+    "transcript": "Marketing by email",
+    "risk": 80,
+    "label": "Scam",
+    "rationale": "Heuristic: soft keyword match",
+    "language": "en",
+    "advice": "This is a scam call. Be aware.",
+    "processing_time": 0.636509895324707,
+    "file": "test_audio_english/scam_02.wav"
+  },
+  {
+    "transcript": "100% free",
+    "risk": 80,
+    "label": "Scam",
+    "rationale": "Heuristic: soft keyword match",
+    "language": "en",
+    "advice": "This is a scam call. Be aware.",
+    "processing_time": 0.6227281093597412,
+    "file": "test_audio_english/scam_03.wav"
+  },
+  {
+    "transcript": "exclusive deal",
+    "risk": 80,
+    "label": "Scam",
+    "rationale": "Heuristic: soft keyword match",
+    "language": "en",
+    "advice": "This is a scam call. Be aware.",
+    "processing_time": 0.6198668479919434,
+    "file": "test_audio_english/scam_04.wav"
+  },
+  {
+    "transcript": "Requires initial investment",
+    "risk": 80,
+    "label": "Scam",
+    "rationale": "Heuristic: soft keyword match",
+    "language": "en",
+    "advice": "This is a scam call. Be aware.",
+    "processing_time": 0.6397252082824707,
+    "file": "test_audio_english/scam_05.wav"
+  },
+  {
+    "transcript": "Fast Cash",
+    "risk": 80,
+    "label": "Scam",
+    "rationale": "Keywords detected: fast cash",
+    "language": "en",
+    "advice": "This is a scam call. Be aware.",
+    "processing_time": 0.6230971813201904,
+    "file": "test_audio_english/scam_06.wav"
+  },
+  {
+    "transcript": "Risk-free",
+    "risk": 80,
+    "label": "Scam",
+    "rationale": "Heuristic: soft keyword match",
+    "language": "en",
+    "advice": "This is a scam call. Be aware.",
+    "processing_time": 0.6244490146636963,
+    "file": "test_audio_english/scam_07.wav"
+  },
+  {
+    "transcript": "Satisfaction guaranteed.",
+    "risk": 80,
+    "label": "Scam",
+    "rationale": "Keywords detected: satisfaction guaranteed",
+    "language": "en",
+    "advice": "This is a scam call. Be aware.",
+    "processing_time": 0.6424589157104492,
+    "file": "test_audio_english/scam_08.wav"
+  },
+  {
+    "transcript": "Sign up free today!",
+    "risk": 80,
+    "label": "Scam",
+    "rationale": "Heuristic: soft keyword match",
+    "language": "en",
+    "advice": "This is a scam call. Be aware.",
+    "processing_time": 0.6485307216644287,
+    "file": "test_audio_english/scam_09.wav"
+  },
+  {
+    "transcript": "Guess it now!",
+    "risk": 80,
+    "label": "Scam",
+    "rationale": "Heuristic: short marketing-like utterance",
+    "language": "en",
+    "advice": "This is a scam call. Be aware.",
+    "processing_time": 0.6313371658325195,
+    "file": "test_audio_english/scam_10.wav"
+  }
+]

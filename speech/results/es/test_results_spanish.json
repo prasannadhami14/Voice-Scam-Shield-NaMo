@@ -1,0 +1,182 @@
+[
+  {
+    "transcript": "Buenos días.",
+    "risk": 0,
+    "label": "Safe",
+    "rationale": "No scam keywords detected",
+    "language": "es",
+    "processing_time": 0.43117189407348633,
+    "file": "test_audio_spanish/non_scam_01.wav"
+  },
+  {
+    "transcript": "¿Cómo estás?",
+    "risk": 0,
+    "label": "Safe",
+    "rationale": "No scam keywords detected",
+    "language": "es",
+    "processing_time": 0.3748610019683838,
+    "file": "test_audio_spanish/non_scam_02.wav"
+  },
+  {
+    "transcript": "Me gusta la música.",
+    "risk": 0,
+    "label": "Safe",
+    "rationale": "No scam keywords detected",
+    "language": "es",
+    "processing_time": 0.3755168914794922,
+    "file": "test_audio_spanish/non_scam_03.wav"
+  },
+  {
+    "transcript": "a good time boy.",
+    "risk": 0,
+    "label": "Safe",
+    "rationale": "No scam keywords detected",
+    "language": "en",
+    "processing_time": 0.6119029521942139,
+    "file": "test_audio_spanish/non_scam_04.wav"
+  },
+  {
+    "transcript": "Voy a la escuela.",
+    "risk": 0,
+    "label": "Safe",
+    "rationale": "No scam keywords detected",
+    "language": "es",
+    "processing_time": 0.39832401275634766,
+    "file": "test_audio_spanish/non_scam_05.wav"
+  },
+  {
+    "transcript": "I have a mask.",
+    "risk": 0,
+    "label": "Safe",
+    "rationale": "No scam keywords detected",
+    "language": "en",
+    "processing_time": 0.5992431640625,
+    "file": "test_audio_spanish/non_scam_06.wav"
+  },
+  {
+    "transcript": "La comida está deliciosa.",
+    "risk": 0,
+    "label": "Safe",
+    "rationale": "No scam keywords detected",
+    "language": "es",
+    "processing_time": 0.40580201148986816,
+    "file": "test_audio_spanish/non_scam_07.wav"
+  },
+  {
+    "transcript": "Quiero aprender español.",
+    "risk": 0,
+    "label": "Safe",
+    "rationale": "No scam keywords detected",
+    "language": "es",
+    "processing_time": 0.39124298095703125,
+    "file": "test_audio_spanish/non_scam_08.wav"
+  },
+  {
+    "transcript": "el cine está cerrado.",
+    "risk": 0,
+    "label": "Safe",
+    "rationale": "No scam keywords detected",
+    "language": "es",
+    "processing_time": 0.40296173095703125,
+    "file": "test_audio_spanish/non_scam_09.wav"
+  },
+  {
+    "transcript": "Nos vemos mañana.",
+    "risk": 0,
+    "label": "Safe",
+    "rationale": "No scam keywords detected",
+    "language": "es",
+    "processing_time": 0.3758511543273926,
+    "file": "test_audio_spanish/non_scam_10.wav"
+  },
+  {
+    "transcript": "Eliminate the Uda.",
+    "risk": 80,
+    "label": "Scam",
+    "rationale": "Heuristic: short marketing-like utterance",
+    "language": "en",
+    "processing_time": 0.6170058250427246,
+    "file": "test_audio_spanish/scam_01.wav"
+  },
+  {
+    "transcript": "Marketing for Correo.",
+    "risk": 80,
+    "label": "Scam",
+    "rationale": "Heuristic: soft keyword match",
+    "language": "en",
+    "processing_time": 0.5923337936401367,
+    "file": "test_audio_spanish/scam_02.wav"
+  },
+  {
+    "transcript": "100% free.",
+    "risk": 80,
+    "label": "Scam",
+    "rationale": "Heuristic: soft keyword match",
+    "language": "en",
+    "processing_time": 0.5515058040618896,
+    "file": "test_audio_spanish/scam_03.wav"
+  },
+  {
+    "transcript": "Oferta exclusiva.",
+    "risk": 80,
+    "label": "Scam",
+    "rationale": "Heuristic: short marketing-like utterance",
+    "language": "en",
+    "processing_time": 0.6025240421295166,
+    "file": "test_audio_spanish/scam_04.wav"
+  },
+  {
+    "transcript": "requiere inversión inicial.",
+    "risk": 80,
+    "label": "Scam",
+    "rationale": "High-risk Spanish term: requiere inversión inicial",
+    "language": "es",
+    "processing_time": 0.4046027660369873,
+    "file": "test_audio_spanish/scam_05.wav"
+  },
+  {
+    "transcript": "Dinero rápido.",
+    "risk": 80,
+    "label": "Scam",
+    "rationale": "High-risk Spanish term: dinero rápido",
+    "language": "es",
+    "processing_time": 0.3795762062072754,
+    "file": "test_audio_spanish/scam_06.wav"
+  },
+  {
+    "transcript": "Sin riesgo",
+    "risk": 80,
+    "label": "Scam",
+    "rationale": "Heuristic: short marketing-like utterance",
+    "language": "en",
+    "processing_time": 0.5864319801330566,
+    "file": "test_audio_spanish/scam_07.wav"
+  },
+  {
+    "transcript": "Satisfacción garantizada.",
+    "risk": 80,
+    "label": "Scam",
+    "rationale": "High-risk Spanish term: satisfacción garantizada",
+    "language": "es",
+    "processing_time": 0.39200615882873535,
+    "file": "test_audio_spanish/scam_08.wav"
+  },
+  {
+    "transcript": "Register to free today.",
+    "risk": 80,
+    "label": "Scam",
+    "rationale": "Heuristic: soft keyword match",
+    "language": "en",
+    "processing_time": 0.6750710010528564,
+    "file": "test_audio_spanish/scam_09.wav"
+  },
+  {
+    "transcript": "Obten-luaora.",
+    "risk": 80,
+    "label": "Scam",
+    "rationale": "Heuristic: short marketing-like utterance",
+    "language": "en",
+    "processing_time": 0.6156861782073975,
+    "file": "test_audio_spanish/scam_10.wav"
+  }
+]

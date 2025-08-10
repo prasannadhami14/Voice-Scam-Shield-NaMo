@@ -1,0 +1,132 @@
+[
+  {
+    "transcript": "Rin Ho Tai",
+    "risk": 80,
+    "label": "Scam",
+    "rationale": "Heuristic: short marketing-like utterance",
+    "language": "en",
+    "advice": "This is a scam call. Be aware.",
+    "processing_time": 0.46387696266174316,
+    "file": "test_audio_converted/scam_01.wav"
+  },
+  {
+    "transcript": "Marketing",
+    "risk": 80,
+    "label": "Scam",
+    "rationale": "Heuristic: soft keyword match",
+    "language": "en",
+    "advice": "This is a scam call. Be aware.",
+    "processing_time": 0.346179723739624,
+    "file": "test_audio_converted/scam_02.wav"
+  },
+  {
+    "transcript": "Hattani Kenerdeesh.",
+    "risk": 80,
+    "label": "Scam",
+    "rationale": "Heuristic: short marketing-like utterance",
+    "language": "en",
+    "advice": "This is a scam call. Be aware.",
+    "processing_time": 0.6727659702301025,
+    "file": "test_audio_converted/scam_03.wav"
+  },
+  {
+    "transcript": "Be sure.",
+    "risk": 80,
+    "label": "Scam",
+    "rationale": "Heuristic: short marketing-like utterance",
+    "language": "en",
+    "advice": "This is a scam call. Be aware.",
+    "processing_time": 0.36105918884277344,
+    "file": "test_audio_converted/scam_04.wav"
+  },
+  {
+    "transcript": "más imil",
+    "risk": 0,
+    "label": "Safe",
+    "rationale": "No scam keywords detected",
+    "language": "es",
+    "advice": "This call appears safe.",
+    "processing_time": 0.37298583984375,
+    "file": "test_audio_converted/scam_05.wav"
+  },
+  {
+    "transcript": "Marketing Samadhan",
+    "risk": 80,
+    "label": "Scam",
+    "rationale": "Heuristic: soft keyword match",
+    "language": "en",
+    "advice": "This is a scam call. Be aware.",
+    "processing_time": 0.33772897720336914,
+    "file": "test_audio_converted/scam_06.wav"
+  },
+  {
+    "transcript": "The fire is burning.",
+    "risk": 0,
+    "label": "Safe",
+    "rationale": "No scam keywords detected",
+    "language": "en",
+    "advice": "This call appears safe.",
+    "processing_time": 0.6027977466583252,
+    "file": "test_audio_converted/scam_07.wav"
+  },
+  {
+    "transcript": "So Pratishat.",
+    "risk": 80,
+    "label": "Scam",
+    "rationale": "Heuristic: short marketing-like utterance",
+    "language": "en",
+    "advice": "This is a scam call. Be aware.",
+    "processing_time": 0.3476741313934326,
+    "file": "test_audio_converted/scam_08.wav"
+  },
+  {
+    "transcript": "email marketing",
+    "risk": 80,
+    "label": "Scam",
+    "rationale": "Heuristic: soft keyword match",
+    "language": "en",
+    "advice": "This is a scam call. Be aware.",
+    "processing_time": 0.3528788089752197,
+    "file": "test_audio_converted/scam_09.wav"
+  },
+  {
+    "transcript": "Anurod",
+    "risk": 80,
+    "label": "Scam",
+    "rationale": "Heuristic: short marketing-like utterance",
+    "language": "en",
+    "advice": "This is a scam call. Be aware.",
+    "processing_time": 0.5655348300933838,
+    "file": "test_audio_converted/scam_10.wav"
+  },
+  {
+    "transcript": "saw Pratishaat Moved.",
+    "risk": 80,
+    "label": "Scam",
+    "rationale": "Heuristic: short marketing-like utterance",
+    "language": "en",
+    "advice": "This is a scam call. Be aware.",
+    "processing_time": 0.6228969097137451,
+    "file": "test_audio_converted/scam_11.wav"
+  },
+  {
+    "transcript": "Vichesh Deal",
+    "risk": 80,
+    "label": "Scam",
+    "rationale": "Heuristic: soft keyword match",
+    "language": "en",
+    "advice": "This is a scam call. Be aware.",
+    "processing_time": 0.5877659320831299,
+    "file": "test_audio_converted/scam_12.wav"
+  },
+  {
+    "transcript": "Dawa",
+    "risk": 80,
+    "label": "Scam",
+    "rationale": "Heuristic: short marketing-like utterance",
+    "language": "en",
+    "advice": "This is a scam call. Be aware.",
+    "processing_time": 0.5277221202850342,
+    "file": "test_audio_converted/scam_13.wav"
+  }
+]

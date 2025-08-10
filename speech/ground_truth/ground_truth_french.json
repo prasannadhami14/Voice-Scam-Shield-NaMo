@@ -1,0 +1,50 @@
+{
+  "test_audio_french/scam_01.wav": { "label": "Scam", "language": "fr" },
+  "test_audio_french/scam_02.wav": { "label": "Scam", "language": "fr" },
+  "test_audio_french/scam_03.wav": { "label": "Scam", "language": "fr" },
+  "test_audio_french/scam_04.wav": { "label": "Scam", "language": "fr" },
+  "test_audio_french/scam_05.wav": { "label": "Scam", "language": "fr" },
+  "test_audio_french/scam_06.wav": { "label": "Scam", "language": "fr" },
+  "test_audio_french/scam_07.wav": { "label": "Scam", "language": "fr" },
+  "test_audio_french/scam_08.wav": { "label": "Scam", "language": "fr" },
+  "test_audio_french/scam_09.wav": { "label": "Scam", "language": "fr" },
+  "test_audio_french/scam_10.wav": { "label": "Scam", "language": "fr" },
+
+  "test_audio_french/non_scam_01.wav": {
+    "label": "Non-Scam",
+    "language": "fr"
+  },
+  "test_audio_french/non_scam_02.wav": {
+    "label": "Non-Scam",
+    "language": "fr"
+  },
+  "test_audio_french/non_scam_03.wav": {
+    "label": "Non-Scam",
+    "language": "fr"
+  },
+  "test_audio_french/non_scam_04.wav": {
+    "label": "Non-Scam",
+    "language": "fr"
+  },
+  "test_audio_french/non_scam_05.wav": {
+    "label": "Non-Scam",
+    "language": "fr"
+  },
+  "test_audio_french/non_scam_06.wav": {
+    "label": "Non-Scam",
+    "language": "fr"
+  },
+  "test_audio_french/non_scam_07.wav": {
+    "label": "Non-Scam",
+    "language": "fr"
+  },
+  "test_audio_french/non_scam_08.wav": {
+    "label": "Non-Scam",
+    "language": "fr"
+  },
+  "test_audio_french/non_scam_09.wav": {
+    "label": "Non-Scam",
+    "language": "fr"
+  },
+  "test_audio_french/non_scam_10.wav": { "label": "Non-Scam", "language": "fr" }
+}
