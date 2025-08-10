@@ -1,140 +1,24 @@
 import streamlit as st
 import pandas as pd
 import time
-import random
-import requests  # Placeholder for future backend integration
-from streamlit_webrtc import webrtc_streamer, RTCConfiguration, WebRtcMode
+import requests  # Backend integration
+from streamlit_webrtc import webrtc_streamer, RTCConfiguration, WebRtcMode, AudioProcessorBase
 import av
+import mimetypes
+import asyncio
+import threading
+import queue
+import numpy as np
+import websockets
+import io
+import soundfile as sf
+import json
+from urllib.parse import urlparse, urlunparse
 
 # Placeholder for backend URL (uncomment and set when backend is available)
 
 BACKEND_URL = "http://127.0.0.1:8000"
-PROCESS_AUDIO_ENDPOINT = f"{BACKEND_URL}/audio"
-GENERATE_REPORT_ENDPOINT = f"{BACKEND_URL}/alert"
 
-
-# Simulated keyword list (empty initially, small chance of detection for testing)
-keywords = []  # Empty to start; add keywords via backend later
-
-# Home page
-st.title("Voice Scam Shield (Standalone Audio Recorder)")
-
-# Language selection for multilingual support
-language = st.selectbox("Select Language", ["English", "Spanish", "French", "Hindi", "Nepali", "Sanskrit"])
-translations = {
-    "English": {
-        "title": "Voice Scam Shield",
-        "record_audio": "Record Audio",
-        "upload_file": "Upload Audio File for Analysis",
-        "start_recording": "Start Recording",
-        "stop_recording": "Stop Recording",
-        "summary": "Recording Summary",
-        "flagged_segments": "Flagged Segments",
-        "no_segments": "No flagged segments.",
-        "download_report": "Download Report",
-        "processing_file": "Processing file",
-        "choose_file": "Choose an audio file"
-    },
-    "Spanish": {
-        "title": "Escudo de Estafas de Voz",
-        "record_audio": "Grabar Audio",
-        "upload_file": "Subir Archivo de Audio para Análisis",
-        "start_recording": "Iniciar Grabación",
-        "stop_recording": "Detener Grabación",
-        "summary": "Resumen de la Grabación",
-        "flagged_segments": "Segmentos Marcados",
-        "no_segments": "No hay segmentos marcados.",
-        "download_report": "Descargar Informe",
-        "processing_file": "Procesando archivo",
-        "choose_file": "Elige un archivo de audio"
-    },
-    "French": {
-        "title": "Bouclier Antifraude Vocale",
-        "record_audio": "Enregistrer l'Audio",
-        "upload_file": "Télécharger un Fichier Audio pour Analyse",
-        "start_recording": "Démarrer l'Enregistrement",
-        "stop_recording": "Arrêter l'Enregistrement",
-        "summary": "Résumé de l'Enregistrement",
-        "flagged_segments": "Segments Signalés",
-        "no_segments": "Aucun segment signalé.",
-        "download_report": "Télécharger le Rapport",
-        "processing_file": "Traitement du fichier",
-        "choose_file": "Choisissez un fichier audio"
-    },
-    "Hindi": {
-        "title": "वॉयस स्कैम शील्ड",
-        "record_audio": "ऑडियो रिकॉर्ड करें",
-        "upload_file": "विश्लेषण के लिए ऑडियो फ़ाइल अपलोड करें",
-        "start_recording": "रिकॉर्डिंग शुरू करें",
-        "stop_recording": "रिकॉर्डिंग रोकें",
-        "summary": "रिकॉर्डिंग सारांश",
-        "flagged_segments": "चिह्नित खंड",
-        "no_segments": "कोई चिह्नित खंड नहीं।",
-        "download_report": "रिपोर्ट डाउनलोड करें",
-        "processing_file": "फ़ाइल प्रसंस्करण कर रहा है",
-        "choose_file": "एक ऑडियो फ़ाइल चुनें"
-    },
-    "Nepali": {
-        "title": "भ्वाइस स्क्याम शिल्ड",
-        "record_audio": "अडियो रेकर्ड गर्नुहोस्",
-        "upload_file": "विश्लेषणको लागि अडियो फाइल अपलोड गर्नुहोस्",
-        "start_recording": "रिकर्डिङ सुरु गर्नुहोस्",
-        "stop_recording": "रिकर्डिङ रोक्नुहोस्",
-        "summary": "रिकर्डिङ सारांश",
-        "flagged_segments": "फ्ल्याग गरिएका सेगमेन्टहरू",
-        "no_segments": "कुनै फ्ल्याग गरिएका सेगमेन्टहरू छैनन्।",
-        "download_report": "रिपोर्ट डाउनलोड गर्नुहोस्",
-        "processing_file": "फाइल प्रशोधन गर्दै",
-        "choose_file": "एउटा अडियो फाइल छान्नुहोस्"
-    },
-    "Sanskrit": {
-        "title": "स्वर घोटक रक्षक",
-        "record_audio": "शब्द रेकॉर्ड कुरु",
-        "upload_file": "विश्लेषणाय ऑडियो फाइल अपलोड कुरु",
-        "start_recording": "रिकॉर्डिंग आरम्भ कुरु",
-        "stop_recording": "रिकॉर्डिंग स्थगित कुरु",
-        "summary": "रिकॉर्डिंग सारांश",
-        "flagged_segments": "चिह्नित खण्ड",
-        "no_segments": "न चिह्नित खण्ड।",
-        "download_report": "रिपोर्ट डाउनलोड कुरु",
-        "processing_file": "फाइल प्रसंस्करण",
-        "choose_file": "एकं ऑडियो फाइल वृणु"
-    }
-}
-
-# Apply selected language
-t = translations[language]
-
-# Mode selection
-option = st.selectbox("Choose Mode", (t["record_audio"], t["upload_file"]))
-
-if option == t["record_audio"]:
-    st.header(t["record_audio"])
-
-    # Initialize session state
-    if "recording_active" not in st.session_state:
-        st.session_state["recording_active"] = False
-        st.session_state["current_data"] = None
-        st.session_state["call_segments"] = []
-        st.session_state["start_time"] = None
-        st.session_state["show_report"] = False
-        st.session_state["detected_keywords"] = set()
-
-    # WebRTC configuration for audio recording
-    rtc_configuration = RTCConfiguration({"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]})
-
-    # Audio callback to simulate transcription
-    def audio_frame_callback(frame: av.AudioFrame) -> av.AudioFrame:
-        # Simulate transcription; no actual audio processing
-        # TODO: For backend integration, send audio frame to backend
-        # Example:
-        audio_data = frame.to_ndarray().tobytes()
-        response = requests.post(PROCESS_AUDIO_ENDPOINT, data=audio_data)
-        if response.status_code == 200:
-            data = response.json()
-            # Update with real transcript, keyword, score, label
-
-        return frame
 
     # Start/stop recording
     if not st.session_state["recording_active"] and not st.session_state["show_report"]:
@@ -142,83 +26,116 @@ if option == t["record_audio"]:
             st.session_state["recording_active"] = True
             st.session_state["call_segments"] = []
             st.session_state["detected_keywords"] = set()
+            st.session_state["live_transcript"] = ""
+            st.session_state["live_keywords"] = set()
+            st.session_state["live_keyword_score"] = 0.0
             st.session_state["start_time"] = time.time()
             st.session_state["show_report"] = False
             st.success(f"{t['start_recording']} (simulated).")
 
     if st.session_state["recording_active"]:
         # Start WebRTC streamer for audio capture
+        _start_ws_sender_once()
+        # ensure global stream state is updated for callback thread
+        _set_global_stream_state_from_session()
+
         ctx = webrtc_streamer(
             key="audio-recorder",
             mode=WebRtcMode.SENDONLY,
             rtc_configuration=rtc_configuration,
             media_stream_constraints={"audio": True, "video": False},
-            audio_frame_callback=audio_frame_callback,
+            audio_processor_factory=WSForwardingAudioProcessor,
         )
 
-        # Placeholders for live updates
-        risk_placeholder = st.empty()
-        transcript_placeholder = st.empty()
+        # Simple status while recording (live results from backend if available)
+        st.info("Recording... stop to view results. Live streaming to backend enabled.")
+        # Drain results_queue in main thread and expose a recent live_result
+        try:
+            rq = st.session_state.get("results_queue")
+            if rq is not None:
+                drained = None
+                while not rq.empty():
+                    drained = rq.get_nowait()
+                if drained is not None:
+                    st.session_state["live_result"] = drained if isinstance(drained, dict) else st.session_state.get("live_result")
+        except Exception:
+            pass
 
-        # Simulate real-time transcription and analysis
-        elapsed_time = int(time.time() - st.session_state["start_time"]) if st.session_state["start_time"] else 0
-        segment_count = len(st.session_state["call_segments"])
-        for _ in range(100):
-            if not st.session_state["recording_active"] or not ctx.state.playing:
-                break
-            # Simulate transcription
-            transcript = {
-                "user": f"User spoke something (segment {segment_count + 1})",
-                "caller": f"Caller responded (segment {segment_count + 1})"
-            }
-            # Simulate scam detection
-            score = random.randint(0, 100)
-            if score < 50:
-                label = "Safe"
-                keyword = None
-            elif score < 80:
-                label = "Suspicious"
-                keyword = "test keyword" if random.random() < 0.2 else None  # 20% chance of keyword
+        live = st.session_state.get("live_result")
+        if isinstance(live, dict):
+            # Accumulate transcript
+            trans = live.get("transcription", {}) or {}
+            new_text = (trans.get("text") or "").strip()
+            if new_text:
+                # naive dedup: append only if differs from recent tail
+                tail = st.session_state.get("live_transcript", "")[-400:]
+                if new_text not in tail:
+                    st.session_state["live_transcript"] = (st.session_state.get("live_transcript", "") + " " + new_text).strip()
+
+            # Accumulate keywords
+            kw = live.get("keywords", {}) or {}
+            found = kw.get("keywords_found", []) or []
+            try:
+                st.session_state["live_keywords"].update({k for k in found if isinstance(k, str)})
+            except Exception:
+                st.session_state["live_keywords"] = set(found)
+            st.session_state["live_keyword_score"] = max(st.session_state.get("live_keyword_score", 0.0), float(kw.get("keyword_score", 0.0)))
+
+            # Add a flagged segment if risky or keywords found
+            try:
+                risk = int(live.get("risk", 0))
+                label = live.get("label", "")
+                rationale = live.get("rationale", "")
+                elapsed = time.time() - (st.session_state.get("start_time") or time.time())
+                if risk >= 60 or found:
+                    st.session_state["call_segments"].append({
+                        "t": round(elapsed, 1),
+                        "risk": risk,
+                        "label": label,
+                        "rationale": rationale,
+                        "keywords": ", ".join(sorted(set(found)))
+                    })
+            except Exception:
+                pass
+
+            # UI: live header
+            st.caption("Live detection:")
+            cols = st.columns(3)
+            with cols[0]:
+                st.metric("Risk", f"{risk if 'risk' in locals() else live.get('risk', 0)}")
+            with cols[1]:
+                st.metric("Label", f"{label if 'label' in locals() else live.get('label', 'Safe')}")
+            with cols[2]:
+                st.caption(rationale if 'rationale' in locals() else live.get('rationale', ''))
+
+            # UI: live transcript with keyword highlights (keep it reactive)
+            if "_live_transcript_placeholder" not in st.session_state:
+                st.session_state["_live_transcript_placeholder"] = st.empty()
+            transcript_ph = st.session_state["_live_transcript_placeholder"]
+            current_text = st.session_state.get("live_transcript", "")
+            if current_text:
+                transcript_ph.markdown("**Live transcription:**\n\n" + highlight_keywords(current_text, list(st.session_state.get("live_keywords", set()))), unsafe_allow_html=True)
             else:
-                label = "Scam"
-                keyword = "test keyword" if random.random() < 0.2 else None
-            st.session_state["current_data"] = {"transcript": transcript, "keyword": keyword, "score": score, "label": label}
+                transcript_ph.markdown("**Live transcription:** (listening...) ")
 
-            # Update risk display with keyword
-            color = {"Safe": "green", "Suspicious": "yellow", "Scam": "red"}.get(label, "gray")
-            risk_placeholder.markdown(
-                f"<h3 style='color:{color}'>Risk: {label} ({score}%)</h3><p>Keyword: {keyword or 'None'}</p>",
-                unsafe_allow_html=True
-            )
+            # UI: keyword chips
+            if st.session_state.get("live_keywords"):
+                st.markdown("**Detected scam words (live):**")
+                chips = "".join(f"<span class='kw-chip'>{kw}</span>" for kw in sorted(st.session_state["live_keywords"], key=str.lower))
+                st.markdown(chips, unsafe_allow_html=True)
 
-            # Update transcript without timestamps
-            transcript_placeholder.markdown(
-                f"**User:** {transcript['user']}<br>**Caller:** {transcript['caller']}",
-                unsafe_allow_html=True
-            )
-
-            # Add segment to report with timestamp
-            timestamp = f"00:{elapsed_time // 60:02d}:{elapsed_time % 60:02d}"
-            segment = {
-                "Timestamp": timestamp,
-                "Label": label,
-                "Keyword": keyword or "None"
-            }
-            st.session_state["call_segments"].append(segment)
-            if keyword:
-                st.session_state["detected_keywords"].add(keyword)
-
-            # Stop Recording button
-            if st.button(t["stop_recording"]):
-                st.session_state["recording_active"] = False
-                st.session_state["show_report"] = True
-                st.rerun()
-                break
-
-            time.sleep(2)
-            elapsed_time += 2
-            segment_count += 1
-            st.rerun()
+        # Stop recording control
+        if st.button(t["stop_recording"]):
+            st.session_state["recording_active"] = False
+            st.session_state["show_report"] = True
+            st.success(t["stop_recording"])
+            # Gracefully signal sender to stop
+            try:
+                q = st.session_state.get("ws_queue")
+                if q:
+                    q.put(None)
+            except Exception:
+                pass
 
     if st.session_state["show_report"]:
         # Generate dynamic summary based on detected keywords
@@ -251,63 +168,41 @@ if option == t["record_audio"]:
 
 elif option == t["upload_file"]:
     st.header(t["upload_file"])
-
-=======
-
-    uploaded_file = st.file_uploader(t["choose_file"], type=["wav", "mp3", "m4a"])
-
+    
     if uploaded_file is not None:
-        # Simulate file processing
         st.write(f"{t['processing_file']}: {uploaded_file.name}")
-        time.sleep(1)
-        
-        # TODO: For backend, send file to backend for transcription
-        # Example:
-        files = {'file': uploaded_file.getvalue()}
-        response = requests.post(f"{BACKEND_URL}/analyze_file", files=files)
-        if response.status_code == 200:
-            report_data = response.json()
-            segments = report_data['segments']
-        else:
-        # Simulate transcription based on file name length
-            segment_count = min(max(len(uploaded_file.name) // 5, 1), 5)  # 1-5 segments
+        file_bytes = uploaded_file.getvalue()
+        lang_code = LANG_TO_CODE.get(language, "en")
+        with st.spinner(t["processing_file"] + "..."):
+            result = analyze_audio_with_backend(uploaded_file.name, file_bytes, lang_code)
 
-        report_segments = []
-        detected_keywords = set()
-        for i in range(segment_count):
-            score = random.randint(0, 100)
-            if score < 50:
-                label = "Safe"
-                keyword = None
-            elif score < 80:
-                label = "Suspicious"
-                keyword = "test keyword" if random.random() < 0.2 else None
-            else:
-                label = "Scam"
-                keyword = "test keyword" if random.random() < 0.2 else None
-            if label in ["Suspicious", "Scam"]:
-                segment = {
-                    "Timestamp": f"00:00:{i*15:02d}",
-                    "Label": label,
-                    "Keyword": keyword or "None"
-                }
-                report_segments.append(segment)
-                if keyword:
-                    detected_keywords.add(keyword)
+        if "error" in result:
+            st.error(f"Analysis error: {result['error']}")
+            if result.get("detail"):
+                st.caption(result["detail"])
+            st.stop()
 
-        keywords_str = ", ".join(detected_keywords) or "None"
-        summary = f"Keyword detected: {keywords_str}"
-        
-        st.subheader(t["summary"])
-        st.write(f"{t['summary']}: {summary}")
-        
-        # Display only Suspicious and Scam segments
-        if report_segments:
-            df = pd.DataFrame(report_segments)
-            st.dataframe(df)
+        analysis = result.get("result", {})
+        is_scam = analysis.get("is_scam", False)
+        conf = analysis.get("confidence", 0.0)
+        rationale = analysis.get("rationale", "")
+        details = analysis.get("details", {})
+        transcription = details.get("transcription", {})
+        keywords_info = details.get("keywords", {})
+        found = keywords_info.get("keywords_found", [])
+
+        # Header result
+        st.markdown(f"### {'Scam detected' if is_scam else 'Safe'} — Confidence: {conf:.0%}")
+        if rationale:
+            st.write(rationale)
+
+        # Show transcribed text with highlighted scam words
+        text = transcription.get("text", "")
+        if text:
+            st.markdown("**Transcription (scam words highlighted):**")
+            st.markdown(highlight_keywords(text, found), unsafe_allow_html=True)
+            st.caption(f"Language: {transcription.get('language','?')} | Confidence: {transcription.get('confidence',0):.0%}")
         else:
-            st.write(t["no_segments"])
-        
-        # Download report as CSV
-        csv = pd.DataFrame(report_segments).to_csv(index=False)
-        st.download_button(t["download_report"], csv, "file_report.csv", "text/csv")
+
+        else:
+            st.write("None")

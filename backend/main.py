@@ -16,6 +16,8 @@ import json
 
 # Import our integrated detection system
 import sys
+# Add backend directory for 'routes' imports
+sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 # Add repo root to sys.path so we can import the 'speech' package
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from speech.anti_spoofing.integrated_detection import IntegratedDetectionSystem
