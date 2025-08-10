@@ -7,9 +7,11 @@ from streamlit_webrtc import webrtc_streamer, RTCConfiguration, WebRtcMode
 import av
 
 # Placeholder for backend URL (uncomment and set when backend is available)
-# BACKEND_URL = "http://localhost:8000"
-# PROCESS_AUDIO_ENDPOINT = f"{BACKEND_URL}/process_audio"
-# GENERATE_REPORT_ENDPOINT = f"{BACKEND_URL}/generate_report"
+
+BACKEND_URL = "http://127.0.0.1:8000"
+PROCESS_AUDIO_ENDPOINT = f"{BACKEND_URL}/audio"
+GENERATE_REPORT_ENDPOINT = f"{BACKEND_URL}/alert"
+
 
 # Simulated keyword list (empty initially, small chance of detection for testing)
 keywords = []  # Empty to start; add keywords via backend later
@@ -126,11 +128,12 @@ if option == t["record_audio"]:
         # Simulate transcription; no actual audio processing
         # TODO: For backend integration, send audio frame to backend
         # Example:
-        # audio_data = frame.to_ndarray().tobytes()
-        # response = requests.post(PROCESS_AUDIO_ENDPOINT, data=audio_data)
-        # if response.status_code == 200:
-        #     data = response.json()
-        #     # Update with real transcript, keyword, score, label
+        audio_data = frame.to_ndarray().tobytes()
+        response = requests.post(PROCESS_AUDIO_ENDPOINT, data=audio_data)
+        if response.status_code == 200:
+            data = response.json()
+            # Update with real transcript, keyword, score, label
+
         return frame
 
     # Start/stop recording
@@ -249,6 +252,8 @@ if option == t["record_audio"]:
 elif option == t["upload_file"]:
     st.header(t["upload_file"])
 
+=======
+
     uploaded_file = st.file_uploader(t["choose_file"], type=["wav", "mp3", "m4a"])
 
     if uploaded_file is not None:
@@ -258,14 +263,15 @@ elif option == t["upload_file"]:
         
         # TODO: For backend, send file to backend for transcription
         # Example:
-        # files = {'file': uploaded_file.getvalue()}
-        # response = requests.post(f"{BACKEND_URL}/analyze_file", files=files)
-        # if response.status_code == 200:
-        #     report_data = response.json()
-        #     segments = report_data['segments']
-        # else:
+        files = {'file': uploaded_file.getvalue()}
+        response = requests.post(f"{BACKEND_URL}/analyze_file", files=files)
+        if response.status_code == 200:
+            report_data = response.json()
+            segments = report_data['segments']
+        else:
         # Simulate transcription based on file name length
-        segment_count = min(max(len(uploaded_file.name) // 5, 1), 5)  # 1-5 segments
+            segment_count = min(max(len(uploaded_file.name) // 5, 1), 5)  # 1-5 segments
+
         report_segments = []
         detected_keywords = set()
         for i in range(segment_count):

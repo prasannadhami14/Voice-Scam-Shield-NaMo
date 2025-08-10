@@ -1,0 +1,202 @@
+[
+  {
+    "transcript": "ブーゾー",
+    "risk": 80,
+    "label": "Scam",
+    "rationale": "Heuristic: short marketing-like utterance",
+    "language": "ja",
+    "advice": "This is a scam call. Be aware.",
+    "processing_time": 0.7181742191314697,
+    "file": "test_audio_french/non_scam_01.wav"
+  },
+  {
+    "transcript": "Comment ça va ?",
+    "risk": 80,
+    "label": "Scam",
+    "rationale": "Heuristic: short marketing-like utterance",
+    "language": "fr",
+    "advice": "This is a scam call. Be aware.",
+    "processing_time": 0.6361451148986816,
+    "file": "test_audio_french/non_scam_02.wav"
+  },
+  {
+    "transcript": "J'aime la musique.",
+    "risk": 0,
+    "label": "Safe",
+    "rationale": "No scam keywords detected",
+    "language": "fr",
+    "advice": "This call appears safe.",
+    "processing_time": 0.6468241214752197,
+    "file": "test_audio_french/non_scam_03.wav"
+  },
+  {
+    "transcript": "Il fait beau aujourd'hui.",
+    "risk": 0,
+    "label": "Safe",
+    "rationale": "No scam keywords detected",
+    "language": "fr",
+    "advice": "This call appears safe.",
+    "processing_time": 0.6631560325622559,
+    "file": "test_audio_french/non_scam_04.wav"
+  },
+  {
+    "transcript": "Je vais à l'école.",
+    "risk": 0,
+    "label": "Safe",
+    "rationale": "No scam keywords detected",
+    "language": "fr",
+    "advice": "This call appears safe.",
+    "processing_time": 0.6624808311462402,
+    "file": "test_audio_french/non_scam_05.wav"
+  },
+  {
+    "transcript": "J'ai un animal de compagnie.",
+    "risk": 0,
+    "label": "Safe",
+    "rationale": "No scam keywords detected",
+    "language": "fr",
+    "advice": "This call appears safe.",
+    "processing_time": 0.6842341423034668,
+    "file": "test_audio_french/non_scam_06.wav"
+  },
+  {
+    "transcript": "La nourriture est délicieuse.",
+    "risk": 0,
+    "label": "Safe",
+    "rationale": "No scam keywords detected",
+    "language": "fr",
+    "advice": "This call appears safe.",
+    "processing_time": 0.687053918838501,
+    "file": "test_audio_french/non_scam_07.wav"
+  },
+  {
+    "transcript": "Je veux apprendre le français.",
+    "risk": 0,
+    "label": "Safe",
+    "rationale": "No scam keywords detected",
+    "language": "fr",
+    "advice": "This call appears safe.",
+    "processing_time": 0.6532630920410156,
+    "file": "test_audio_french/non_scam_08.wav"
+  },
+  {
+    "transcript": "le cinéma est fermé.",
+    "risk": 0,
+    "label": "Safe",
+    "rationale": "No scam keywords detected",
+    "language": "fr",
+    "advice": "This call appears safe.",
+    "processing_time": 0.6681790351867676,
+    "file": "test_audio_french/non_scam_09.wav"
+  },
+  {
+    "transcript": "à demain.",
+    "risk": 80,
+    "label": "Scam",
+    "rationale": "Heuristic: short marketing-like utterance",
+    "language": "fr",
+    "advice": "This is a scam call. Be aware.",
+    "processing_time": 0.6236739158630371,
+    "file": "test_audio_french/non_scam_10.wav"
+  },
+  {
+    "transcript": "إلي ميني لدات",
+    "risk": 80,
+    "label": "Scam",
+    "rationale": "Heuristic: non-Latin short promo phrase",
+    "language": "ar",
+    "advice": "This is a scam call. Be aware.",
+    "processing_time": 0.6581759452819824,
+    "file": "test_audio_french/scam_01.wav"
+  },
+  {
+    "transcript": "Marketing Paris Mail",
+    "risk": 80,
+    "label": "Scam",
+    "rationale": "Heuristic: soft keyword match",
+    "language": "en",
+    "advice": "This is a scam call. Be aware.",
+    "processing_time": 0.6293017864227295,
+    "file": "test_audio_french/scam_02.wav"
+  },
+  {
+    "transcript": "100% gratuit.",
+    "risk": 80,
+    "label": "Scam",
+    "rationale": "Keywords detected: 100% gratuit",
+    "language": "fr",
+    "advice": "This is a scam call. Be aware.",
+    "processing_time": 0.6439030170440674,
+    "file": "test_audio_french/scam_03.wav"
+  },
+  {
+    "transcript": "Offre exclusive.",
+    "risk": 80,
+    "label": "Scam",
+    "rationale": "Keywords detected: offre exclusive",
+    "language": "fr",
+    "advice": "This is a scam call. Be aware.",
+    "processing_time": 0.6482648849487305,
+    "file": "test_audio_french/scam_04.wav"
+  },
+  {
+    "transcript": "Exige en investissement initial.",
+    "risk": 80,
+    "label": "Scam",
+    "rationale": "Heuristic: soft keyword match",
+    "language": "fr",
+    "advice": "This is a scam call. Be aware.",
+    "processing_time": 0.6577699184417725,
+    "file": "test_audio_french/scam_05.wav"
+  },
+  {
+    "transcript": "Arge en rapide.",
+    "risk": 80,
+    "label": "Scam",
+    "rationale": "Heuristic: short marketing-like utterance",
+    "language": "fr",
+    "advice": "This is a scam call. Be aware.",
+    "processing_time": 0.6486430168151855,
+    "file": "test_audio_french/scam_06.wav"
+  },
+  {
+    "transcript": "そういっす",
+    "risk": 80,
+    "label": "Scam",
+    "rationale": "Heuristic: short marketing-like utterance",
+    "language": "ja",
+    "advice": "This is a scam call. Be aware.",
+    "processing_time": 0.6367721557617188,
+    "file": "test_audio_french/scam_07.wav"
+  },
+  {
+    "transcript": "Satisfaction garantie.",
+    "risk": 80,
+    "label": "Scam",
+    "rationale": "Keywords detected: satisfaction garantie",
+    "language": "fr",
+    "advice": "This is a scam call. Be aware.",
+    "processing_time": 0.6583218574523926,
+    "file": "test_audio_french/scam_08.wav"
+  },
+  {
+    "transcript": "inscrivez-vous gratuitement aujourd'hui.",
+    "risk": 80,
+    "label": "Scam",
+    "rationale": "Keywords detected: inscrivez-vous gratuitement aujourd'hui",
+    "language": "fr",
+    "advice": "This is a scam call. Be aware.",
+    "processing_time": 0.6970198154449463,
+    "file": "test_audio_french/scam_09.wav"
+  },
+  {
+    "transcript": "オプトニールマントノ",
+    "risk": 80,
+    "label": "Scam",
+    "rationale": "Heuristic: short marketing-like utterance",
+    "language": "ja",
+    "advice": "This is a scam call. Be aware.",
+    "processing_time": 0.6862621307373047,
+    "file": "test_audio_french/scam_10.wav"
+  }
+]
