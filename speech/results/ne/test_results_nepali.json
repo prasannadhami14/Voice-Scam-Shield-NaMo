@@ -1,0 +1,202 @@
+[
+  {
+    "transcript": "Namaste.",
+    "risk": 80,
+    "label": "Scam",
+    "rationale": "Heuristic: short marketing-like utterance",
+    "language": "es",
+    "advice": "This is a scam call. Be aware.",
+    "processing_time": 0.46187305450439453,
+    "file": "test_audio_nepali/non_scam_01.wav"
+  },
+  {
+    "transcript": "Dubai Goswali Turn",
+    "risk": 80,
+    "label": "Scam",
+    "rationale": "Heuristic: short marketing-like utterance",
+    "language": "en",
+    "advice": "This is a scam call. Be aware.",
+    "processing_time": 0.3612830638885498,
+    "file": "test_audio_nepali/non_scam_02.wav"
+  },
+  {
+    "transcript": "나의",
+    "risk": 0,
+    "label": "Safe",
+    "rationale": "No scam keywords detected",
+    "language": "ko",
+    "advice": "This call appears safe.",
+    "processing_time": 0.3491358757019043,
+    "file": "test_audio_nepali/non_scam_03.wav"
+  },
+  {
+    "transcript": "아저씨 라면 롬 오슴처",
+    "risk": 0,
+    "label": "Safe",
+    "rationale": "No scam keywords detected",
+    "language": "ko",
+    "advice": "This call appears safe.",
+    "processing_time": 0.41034603118896484,
+    "file": "test_audio_nepali/non_scam_04.wav"
+  },
+  {
+    "transcript": "mordir de alo a el san su",
+    "risk": 0,
+    "label": "Safe",
+    "rationale": "No scam keywords detected",
+    "language": "es",
+    "advice": "This call appears safe.",
+    "processing_time": 0.6721398830413818,
+    "file": "test_audio_nepali/non_scam_05.wav"
+  },
+  {
+    "transcript": "모송과 팩 2절 나올 수 없음",
+    "risk": 0,
+    "label": "Safe",
+    "rationale": "No scam keywords detected",
+    "language": "ko",
+    "advice": "This call appears safe.",
+    "processing_time": 0.3945589065551758,
+    "file": "test_audio_nepali/non_scam_06.wav"
+  },
+  {
+    "transcript": "Hanna Sua Dilo Chow",
+    "risk": 0,
+    "label": "Safe",
+    "rationale": "No scam keywords detected",
+    "language": "en",
+    "advice": "This call appears safe.",
+    "processing_time": 0.6741869449615479,
+    "file": "test_audio_nepali/non_scam_07.wav"
+  },
+  {
+    "transcript": "Molnipali Signature Hunsu",
+    "risk": 80,
+    "label": "Scam",
+    "rationale": "Heuristic: short marketing-like utterance",
+    "language": "ne",
+    "advice": "This is a scam call. Be aware.",
+    "processing_time": 0.39484596252441406,
+    "file": "test_audio_nepali/non_scam_08.wav"
+  },
+  {
+    "transcript": "Cinema one the true.",
+    "risk": 0,
+    "label": "Safe",
+    "rationale": "No scam keywords detected",
+    "language": "en",
+    "advice": "This call appears safe.",
+    "processing_time": 0.37744688987731934,
+    "file": "test_audio_nepali/non_scam_09.wav"
+  },
+  {
+    "transcript": "muy bien, vamos la",
+    "risk": 0,
+    "label": "Safe",
+    "rationale": "No scam keywords detected",
+    "language": "es",
+    "advice": "This call appears safe.",
+    "processing_time": 0.3786492347717285,
+    "file": "test_audio_nepali/non_scam_10.wav"
+  },
+  {
+    "transcript": "Ring her down most.",
+    "risk": 0,
+    "label": "Safe",
+    "rationale": "No scam keywords detected",
+    "language": "en",
+    "advice": "This call appears safe.",
+    "processing_time": 0.36197805404663086,
+    "file": "test_audio_nepali/scam_01.wav"
+  },
+  {
+    "transcript": "Marketing",
+    "risk": 80,
+    "label": "Scam",
+    "rationale": "Heuristic: soft keyword match",
+    "language": "en",
+    "advice": "This is a scam call. Be aware.",
+    "processing_time": 0.33711791038513184,
+    "file": "test_audio_nepali/scam_02.wav"
+  },
+  {
+    "transcript": "8-Side Brotisot Nisul Gang",
+    "risk": 0,
+    "label": "Safe",
+    "rationale": "No scam keywords detected",
+    "language": "en",
+    "advice": "This call appears safe.",
+    "processing_time": 0.6118869781494141,
+    "file": "test_audio_nepali/scam_03.wav"
+  },
+  {
+    "transcript": "Be safe please.",
+    "risk": 80,
+    "label": "Scam",
+    "rationale": "Heuristic: short marketing-like utterance",
+    "language": "en",
+    "advice": "This is a scam call. Be aware.",
+    "processing_time": 0.3673369884490967,
+    "file": "test_audio_nepali/scam_04.wav"
+  },
+  {
+    "transcript": "Praram Big Logani Aosil",
+    "risk": 0,
+    "label": "Safe",
+    "rationale": "No scam keywords detected",
+    "language": "en",
+    "advice": "This call appears safe.",
+    "processing_time": 0.6193509101867676,
+    "file": "test_audio_nepali/scam_05.wav"
+  },
+  {
+    "transcript": "Blue Nogal",
+    "risk": 80,
+    "label": "Scam",
+    "rationale": "Heuristic: short marketing-like utterance",
+    "language": "en",
+    "advice": "This is a scam call. Be aware.",
+    "processing_time": 0.4762849807739258,
+    "file": "test_audio_nepali/scam_06.wav"
+  },
+  {
+    "transcript": "ジョキムクター",
+    "risk": 80,
+    "label": "Scam",
+    "rationale": "Heuristic: short marketing-like utterance",
+    "language": "ja",
+    "advice": "This is a scam call. Be aware.",
+    "processing_time": 0.429426908493042,
+    "file": "test_audio_nepali/scam_07.wav"
+  },
+  {
+    "transcript": "12th gear NT",
+    "risk": 80,
+    "label": "Scam",
+    "rationale": "Heuristic: short marketing-like utterance",
+    "language": "en",
+    "advice": "This is a scam call. Be aware.",
+    "processing_time": 0.3644270896911621,
+    "file": "test_audio_nepali/scam_08.wav"
+  },
+  {
+    "transcript": "as a necessary design of a gold mousse.",
+    "risk": 0,
+    "label": "Safe",
+    "rationale": "No scam keywords detected",
+    "language": "en",
+    "advice": "This call appears safe.",
+    "processing_time": 0.6441860198974609,
+    "file": "test_audio_nepali/scam_09.wav"
+  },
+  {
+    "transcript": "ھس لائی اہیلی براکتا گرنموز",
+    "risk": 80,
+    "label": "Scam",
+    "rationale": "Heuristic: non-Latin short promo phrase",
+    "language": "mr",
+    "advice": "This is a scam call. Be aware.",
+    "processing_time": 0.4588429927825928,
+    "file": "test_audio_nepali/scam_10.wav"
+  }
+]
