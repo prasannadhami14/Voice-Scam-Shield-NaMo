@@ -3,7 +3,7 @@ import time
 import json
 import requests
 from typing import Dict, List, Optional
-from synthetic_voice_detector import SyntheticVoiceDetector
+from .synthetic_voice_detector import SyntheticVoiceDetector
 import threading
 import queue
 import sounddevice as sd
