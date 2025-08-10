@@ -1,21 +1,169 @@
 import streamlit as st
 import pandas as pd
 import time
-import random
-import requests  # Placeholder for future backend integration
-from streamlit_webrtc import webrtc_streamer, RTCConfiguration, WebRtcMode
+import requests  # Backend integration
+from streamlit_webrtc import webrtc_streamer, RTCConfiguration, WebRtcMode, AudioProcessorBase
 import av
+import mimetypes
+import asyncio
+import threading
+import queue
+import numpy as np
+import websockets
+import io
+import soundfile as sf
+import json
+from urllib.parse import urlparse, urlunparse
 
 # Placeholder for backend URL (uncomment and set when backend is available)
 BACKEND_URL = "http://127.0.0.1:8000"
-PROCESS_AUDIO_ENDPOINT = f"{BACKEND_URL}/audio"
-GENERATE_REPORT_ENDPOINT = f"{BACKEND_URL}/alert"
 
-# Simulated keyword list (empty initially, small chance of detection for testing)
-keywords = []  # Empty to start; add keywords via backend later
+# Styles for keyword highlighting
+st.markdown(
+    """
+<style>
+.kw-chip {
+  display: inline-block;
+  padding: 0.2rem 0.5rem;
+  margin: 0.2rem 0.35rem 0 0;
+  background-color: #ffe8e8;
+  border: 1px solid #ff4d4f;
+  color: #a8071a;
+  border-radius: 12px;
+  font-size: 0.85rem;
+}
+.kw-highlight {
+  background-color: #fff3cd;
+  border-bottom: 2px solid #ff4d4f;
+  padding: 0 2px;
+}
+</style>
+""",
+    unsafe_allow_html=True,
+)
 
-# Home page
-st.title("Voice Scam Shield (Standalone Audio Recorder)")
+LANG_TO_CODE = {
+    "English": "en",
+    "Spanish": "es",
+    "French": "fr",
+    "Hindi": "hi",
+    "Nepali": "ne",
+    # Map Sanskrit to Hindi for transcription support
+    "Sanskrit": "hi",
+}
+
+def highlight_keywords(text: str, found_keywords) -> str:
+    import re
+    if not text:
+        return ""
+    kws = [kw for kw in (found_keywords or []) if isinstance(kw, str) and kw.strip()]
+    if not kws:
+        return text
+    # Longest first to avoid partial overlaps
+    kws = sorted(set(kws), key=len, reverse=True)
+    pattern = re.compile(r"(" + "|".join(re.escape(k) for k in kws) + r")", re.IGNORECASE)
+    return pattern.sub(lambda m: f'<span class="kw-highlight">{m.group(0)}</span>', text)
+
+def analyze_audio_with_backend(file_name: str, file_bytes: bytes, language_code: str):
+    try:
+        guessed_mime, _ = mimetypes.guess_type(file_name)
+        content_type = guessed_mime if guessed_mime and guessed_mime.startswith("audio/") else "audio/wav"
+        files = {
+            "file": (file_name, file_bytes, content_type),
+        }
+        data = {"language": language_code}
+        resp = requests.post(f"{BACKEND_URL}/analyze-audio", files=files, data=data, timeout=120)
+        if resp.status_code == 200:
+            return resp.json()
+        return {"error": f"Backend error {resp.status_code}", "detail": resp.text}
+    except Exception as e:
+        return {"error": str(e)}
+
+
+def _compute_ws_url(http_url: str) -> str:
+    """Compute the WebSocket URL from the configured HTTP backend URL."""
+    parsed = urlparse(http_url)
+    if parsed.scheme not in ("http", "https"):
+        # Assume user already provided ws/wss URL
+        return http_url.rstrip("/") + "/audio/stream"
+    ws_scheme = "wss" if parsed.scheme == "https" else "ws"
+    ws_parsed = parsed._replace(scheme=ws_scheme)
+    base_ws = urlunparse(ws_parsed).rstrip("/")
+    return f"{base_ws}/audio/stream"
+
+
+def _start_ws_sender_once():
+    """Start a background WebSocket client to send audio chunks to backend and receive results."""
+    if st.session_state.get("ws_thread_started"):
+        return
+
+    st.session_state.setdefault("ws_queue", queue.Queue(maxsize=50))
+    st.session_state.setdefault("results_queue", queue.Queue(maxsize=50))
+    st.session_state.setdefault("live_result", None)
+
+    ws_url = _compute_ws_url(BACKEND_URL)
+    ws_queue = st.session_state["ws_queue"]
+    results_queue = st.session_state["results_queue"]
+
+    def _run():
+        async def _ws_loop():
+            while True:
+                try:
+                    async with websockets.connect(ws_url, ping_interval=20, ping_timeout=20, max_size=2**22) as ws:
+                        async def _recv_task():
+                            while True:
+                                try:
+                                    msg = await ws.recv()
+                                except Exception:
+                                    break
+                                # Backend sends JSON text frames
+                                try:
+                                    data = json.loads(msg) if isinstance(msg, (str, bytes)) else msg
+                                    # push to results queue for main thread to consume
+                                    try:
+                                        results_queue.put_nowait(data)
+                                    except queue.Full:
+                                        # drop if overflowing
+                                        pass
+                                except Exception:
+                                    pass
+
+                        async def _send_task():
+                            while True:
+                                chunk = ws_queue.get()
+                                if chunk is None:
+                                    try:
+                                        await ws.close()
+                                    except Exception:
+                                        pass
+                                    return
+                                try:
+                                    await ws.send(chunk)
+                                except Exception:
+                                    # Put back the chunk if needed or drop
+                                    pass
+
+                        await asyncio.gather(_recv_task(), _send_task())
+                except Exception:
+                    # Retry connection after short delay
+                    time.sleep(1.0)
+                    continue
+
+        asyncio.run(_ws_loop())
+
+    t = threading.Thread(target=_run, daemon=True)
+    t.start()
+    st.session_state["ws_thread_started"] = True
+
+
+# Global reference to avoid calling Streamlit APIs from audio callback thread
+_STREAM_STATE = {"ws_queue": None}
+
+def _set_global_stream_state_from_session():
+    try:
+        _STREAM_STATE["ws_queue"] = st.session_state.get("ws_queue")
+    except Exception:
+        _STREAM_STATE["ws_queue"] = None
 
 # Language selection for multilingual support
 language = st.selectbox("Select Language", ["English", "Spanish", "French", "Hindi", "Nepali", "Sanskrit"])
@@ -103,6 +251,9 @@ translations = {
 # Apply selected language
 t = translations[language]
 
+# Localized title
+st.title(t["title"])
+
 # Mode selection
 option = st.selectbox("Choose Mode", (t["record_audio"], t["upload_file"]))
 
@@ -121,17 +272,34 @@ if option == t["record_audio"]:
     # WebRTC configuration for audio recording
     rtc_configuration = RTCConfiguration({"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]})
 
-    # Audio callback to simulate transcription
-    def audio_frame_callback(frame: av.AudioFrame) -> av.AudioFrame:
-        # Simulate transcription; no actual audio processing
-        # TODO: For backend integration, send audio frame to backend
-        # Example:
-        audio_data = frame.to_ndarray().tobytes()
-        response = requests.post(PROCESS_AUDIO_ENDPOINT, data=audio_data)
-        if response.status_code == 200:
-            data = response.json()
-            # Update with real transcript, keyword, score, label
-        return frame
+    # Audio processor to capture outgoing mic audio in SENDONLY mode
+    class WSForwardingAudioProcessor(AudioProcessorBase):
+        def recv(self, frame: av.AudioFrame) -> av.AudioFrame:
+            try:
+                pcm = frame.to_ndarray()
+                if pcm.ndim == 2:
+                    mono = pcm.mean(axis=0)
+                else:
+                    mono = pcm
+                if mono.dtype.kind in ("f",):
+                    mono = np.clip(mono, -1.0, 1.0)
+                    mono = (mono * 32767.0).astype(np.int16)
+                elif mono.dtype != np.int16:
+                    mono = mono.astype(np.int16)
+
+                buf = io.BytesIO()
+                sr = getattr(frame, "sample_rate", 16000) or 16000
+                sf.write(buf, mono, samplerate=int(sr), subtype="PCM_16", format="WAV")
+                data = buf.getvalue()
+                q = _STREAM_STATE.get("ws_queue")
+                if q is not None and not q.full():
+                    try:
+                        q.put_nowait(data)
+                    except Exception:
+                        pass
+            except Exception:
+                pass
+            return frame
 
     # Start/stop recording
     if not st.session_state["recording_active"] and not st.session_state["show_report"]:
@@ -139,83 +307,116 @@ if option == t["record_audio"]:
             st.session_state["recording_active"] = True
             st.session_state["call_segments"] = []
             st.session_state["detected_keywords"] = set()
+            st.session_state["live_transcript"] = ""
+            st.session_state["live_keywords"] = set()
+            st.session_state["live_keyword_score"] = 0.0
             st.session_state["start_time"] = time.time()
             st.session_state["show_report"] = False
             st.success(f"{t['start_recording']} (simulated).")
 
     if st.session_state["recording_active"]:
         # Start WebRTC streamer for audio capture
+        _start_ws_sender_once()
+        # ensure global stream state is updated for callback thread
+        _set_global_stream_state_from_session()
+
         ctx = webrtc_streamer(
             key="audio-recorder",
             mode=WebRtcMode.SENDONLY,
             rtc_configuration=rtc_configuration,
             media_stream_constraints={"audio": True, "video": False},
-            audio_frame_callback=audio_frame_callback,
+            audio_processor_factory=WSForwardingAudioProcessor,
         )
 
-        # Placeholders for live updates
-        risk_placeholder = st.empty()
-        transcript_placeholder = st.empty()
+        # Simple status while recording (live results from backend if available)
+        st.info("Recording... stop to view results. Live streaming to backend enabled.")
+        # Drain results_queue in main thread and expose a recent live_result
+        try:
+            rq = st.session_state.get("results_queue")
+            if rq is not None:
+                drained = None
+                while not rq.empty():
+                    drained = rq.get_nowait()
+                if drained is not None:
+                    st.session_state["live_result"] = drained if isinstance(drained, dict) else st.session_state.get("live_result")
+        except Exception:
+            pass
 
-        # Simulate real-time transcription and analysis
-        elapsed_time = int(time.time() - st.session_state["start_time"]) if st.session_state["start_time"] else 0
-        segment_count = len(st.session_state["call_segments"])
-        for _ in range(100):
-            if not st.session_state["recording_active"] or not ctx.state.playing:
-                break
-            # Simulate transcription
-            transcript = {
-                "user": f"User spoke something (segment {segment_count + 1})",
-                "caller": f"Caller responded (segment {segment_count + 1})"
-            }
-            # Simulate scam detection
-            score = random.randint(0, 100)
-            if score < 50:
-                label = "Safe"
-                keyword = None
-            elif score < 80:
-                label = "Suspicious"
-                keyword = "test keyword" if random.random() < 0.2 else None  # 20% chance of keyword
+        live = st.session_state.get("live_result")
+        if isinstance(live, dict):
+            # Accumulate transcript
+            trans = live.get("transcription", {}) or {}
+            new_text = (trans.get("text") or "").strip()
+            if new_text:
+                # naive dedup: append only if differs from recent tail
+                tail = st.session_state.get("live_transcript", "")[-400:]
+                if new_text not in tail:
+                    st.session_state["live_transcript"] = (st.session_state.get("live_transcript", "") + " " + new_text).strip()
+
+            # Accumulate keywords
+            kw = live.get("keywords", {}) or {}
+            found = kw.get("keywords_found", []) or []
+            try:
+                st.session_state["live_keywords"].update({k for k in found if isinstance(k, str)})
+            except Exception:
+                st.session_state["live_keywords"] = set(found)
+            st.session_state["live_keyword_score"] = max(st.session_state.get("live_keyword_score", 0.0), float(kw.get("keyword_score", 0.0)))
+
+            # Add a flagged segment if risky or keywords found
+            try:
+                risk = int(live.get("risk", 0))
+                label = live.get("label", "")
+                rationale = live.get("rationale", "")
+                elapsed = time.time() - (st.session_state.get("start_time") or time.time())
+                if risk >= 60 or found:
+                    st.session_state["call_segments"].append({
+                        "t": round(elapsed, 1),
+                        "risk": risk,
+                        "label": label,
+                        "rationale": rationale,
+                        "keywords": ", ".join(sorted(set(found)))
+                    })
+            except Exception:
+                pass
+
+            # UI: live header
+            st.caption("Live detection:")
+            cols = st.columns(3)
+            with cols[0]:
+                st.metric("Risk", f"{risk if 'risk' in locals() else live.get('risk', 0)}")
+            with cols[1]:
+                st.metric("Label", f"{label if 'label' in locals() else live.get('label', 'Safe')}")
+            with cols[2]:
+                st.caption(rationale if 'rationale' in locals() else live.get('rationale', ''))
+
+            # UI: live transcript with keyword highlights (keep it reactive)
+            if "_live_transcript_placeholder" not in st.session_state:
+                st.session_state["_live_transcript_placeholder"] = st.empty()
+            transcript_ph = st.session_state["_live_transcript_placeholder"]
+            current_text = st.session_state.get("live_transcript", "")
+            if current_text:
+                transcript_ph.markdown("**Live transcription:**\n\n" + highlight_keywords(current_text, list(st.session_state.get("live_keywords", set()))), unsafe_allow_html=True)
             else:
-                label = "Scam"
-                keyword = "test keyword" if random.random() < 0.2 else None
-            st.session_state["current_data"] = {"transcript": transcript, "keyword": keyword, "score": score, "label": label}
+                transcript_ph.markdown("**Live transcription:** (listening...) ")
 
-            # Update risk display with keyword
-            color = {"Safe": "green", "Suspicious": "yellow", "Scam": "red"}.get(label, "gray")
-            risk_placeholder.markdown(
-                f"<h3 style='color:{color}'>Risk: {label} ({score}%)</h3><p>Keyword: {keyword or 'None'}</p>",
-                unsafe_allow_html=True
-            )
+            # UI: keyword chips
+            if st.session_state.get("live_keywords"):
+                st.markdown("**Detected scam words (live):**")
+                chips = "".join(f"<span class='kw-chip'>{kw}</span>" for kw in sorted(st.session_state["live_keywords"], key=str.lower))
+                st.markdown(chips, unsafe_allow_html=True)
 
-            # Update transcript without timestamps
-            transcript_placeholder.markdown(
-                f"**User:** {transcript['user']}<br>**Caller:** {transcript['caller']}",
-                unsafe_allow_html=True
-            )
-
-            # Add segment to report with timestamp
-            timestamp = f"00:{elapsed_time // 60:02d}:{elapsed_time % 60:02d}"
-            segment = {
-                "Timestamp": timestamp,
-                "Label": label,
-                "Keyword": keyword or "None"
-            }
-            st.session_state["call_segments"].append(segment)
-            if keyword:
-                st.session_state["detected_keywords"].add(keyword)
-
-            # Stop Recording button
-            if st.button(t["stop_recording"]):
-                st.session_state["recording_active"] = False
-                st.session_state["show_report"] = True
-                st.rerun()
-                break
-
-            time.sleep(2)
-            elapsed_time += 2
-            segment_count += 1
-            st.rerun()
+        # Stop recording control
+        if st.button(t["stop_recording"]):
+            st.session_state["recording_active"] = False
+            st.session_state["show_report"] = True
+            st.success(t["stop_recording"])
+            # Gracefully signal sender to stop
+            try:
+                q = st.session_state.get("ws_queue")
+                if q:
+                    q.put(None)
+            except Exception:
+                pass
 
     if st.session_state["show_report"]:
         # Generate dynamic summary based on detected keywords
@@ -249,59 +450,49 @@ if option == t["record_audio"]:
 elif option == t["upload_file"]:
     st.header(t["upload_file"])
 
-    uploaded_file = st.file_uploader(t["choose_file"], type=["wav", "mp3", "m4a"])
+    uploaded_file = st.file_uploader(t["choose_file"], type=["wav", "mp3", "m4a", "flac"]) 
 
     if uploaded_file is not None:
-        # Simulate file processing
         st.write(f"{t['processing_file']}: {uploaded_file.name}")
-        time.sleep(1)
-        
-        # TODO: For backend, send file to backend for transcription
-        # Example:
-        files = {'file': uploaded_file.getvalue()}
-        response = requests.post(f"{BACKEND_URL}/analyze_file", files=files)
-        if response.status_code == 200:
-            report_data = response.json()
-            segments = report_data['segments']
-        else:
-        # Simulate transcription based on file name length
-            segment_count = min(max(len(uploaded_file.name) // 5, 1), 5)  # 1-5 segments
-        report_segments = []
-        detected_keywords = set()
-        for i in range(segment_count):
-            score = random.randint(0, 100)
-            if score < 50:
-                label = "Safe"
-                keyword = None
-            elif score < 80:
-                label = "Suspicious"
-                keyword = "test keyword" if random.random() < 0.2 else None
-            else:
-                label = "Scam"
-                keyword = "test keyword" if random.random() < 0.2 else None
-            if label in ["Suspicious", "Scam"]:
-                segment = {
-                    "Timestamp": f"00:00:{i*15:02d}",
-                    "Label": label,
-                    "Keyword": keyword or "None"
-                }
-                report_segments.append(segment)
-                if keyword:
-                    detected_keywords.add(keyword)
+        file_bytes = uploaded_file.getvalue()
+        lang_code = LANG_TO_CODE.get(language, "en")
+        with st.spinner(t["processing_file"] + "..."):
+            result = analyze_audio_with_backend(uploaded_file.name, file_bytes, lang_code)
 
-        keywords_str = ", ".join(detected_keywords) or "None"
-        summary = f"Keyword detected: {keywords_str}"
-        
-        st.subheader(t["summary"])
-        st.write(f"{t['summary']}: {summary}")
-        
-        # Display only Suspicious and Scam segments
-        if report_segments:
-            df = pd.DataFrame(report_segments)
-            st.dataframe(df)
+        if "error" in result:
+            st.error(f"Analysis error: {result['error']}")
+            if result.get("detail"):
+                st.caption(result["detail"])
+            st.stop()
+
+        analysis = result.get("result", {})
+        is_scam = analysis.get("is_scam", False)
+        conf = analysis.get("confidence", 0.0)
+        rationale = analysis.get("rationale", "")
+        details = analysis.get("details", {})
+        transcription = details.get("transcription", {})
+        keywords_info = details.get("keywords", {})
+        found = keywords_info.get("keywords_found", [])
+
+        # Header result
+        st.markdown(f"### {'Scam detected' if is_scam else 'Safe'} — Confidence: {conf:.0%}")
+        if rationale:
+            st.write(rationale)
+
+        # Show transcribed text with highlighted scam words
+        text = transcription.get("text", "")
+        if text:
+            st.markdown("**Transcription (scam words highlighted):**")
+            st.markdown(highlight_keywords(text, found), unsafe_allow_html=True)
+            st.caption(f"Language: {transcription.get('language','?')} | Confidence: {transcription.get('confidence',0):.0%}")
         else:
-            st.write(t["no_segments"])
-        
-        # Download report as CSV
-        csv = pd.DataFrame(report_segments).to_csv(index=False)
-        st.download_button(t["download_report"], csv, "file_report.csv", "text/csv")
+            st.info("No transcription available")
+
+        # Show list of scam words
+        st.markdown("**Detected scam words:**")
+        if found:
+            chips = "".join(f"<span class='kw-chip'>{kw}</span>" for kw in sorted(set(found), key=str.lower))
+            st.markdown(chips, unsafe_allow_html=True)
+            st.caption(f"Keyword score: {keywords_info.get('keyword_score',0):.0%} | Suspicious: {'Yes' if keywords_info.get('is_suspicious') else 'No'}")
+        else:
+            st.write("None")

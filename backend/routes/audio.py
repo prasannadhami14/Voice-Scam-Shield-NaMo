@@ -76,6 +76,15 @@ async def audio_stream(websocket: WebSocket):
             
             # Process audio chunk
             result = await process_audio_chunk(audio_data, sample_rate)
+            # Include partial transcription text if present for smoother UI
+            try:
+                trans = result.get("transcription", {}) if isinstance(result, dict) else {}
+                if trans and trans.get("text"):
+                    # truncate to last 160 chars to reduce payload size
+                    trans["text"] = trans.get("text", "")[-160:]
+                    result["transcription"] = trans
+            except Exception:
+                pass
             
             # Send result back
             await websocket.send_json(result)
@@ -96,7 +105,11 @@ async def process_audio_chunk(audio_data: np.ndarray, sample_rate: int) -> dict:
         
         # Basic scam detection using transcriber
         if transcriber:
-            result = transcriber.process_audio_chunk(audio_data)
+            # Prefer async if available
+            try:
+                result = await transcriber.process_audio_chunk_async(audio_data)
+            except Exception:
+                result = transcriber.process_audio_chunk(audio_data)
         else:
             result = {"risk": 0, "label": "Safe", "rationale": "System not initialized"}
         

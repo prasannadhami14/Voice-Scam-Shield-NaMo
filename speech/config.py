@@ -4,11 +4,22 @@ import json
 import os
 
 def load_keywords_from_json(filepath: str) -> Set[str]:
-    """Load keywords from a JSON file using a path relative to this file."""
+    """Load keywords from JSON, trying speech/keywords then repo-root keywords/."""
     base_dir = os.path.dirname(__file__)
-    abs_path = os.path.join(base_dir, "keywords", filepath)
-    with open(abs_path, "r", encoding="utf-8") as f:
-        keywords = json.load(f)
+    candidates = [
+        os.path.join(base_dir, "keywords", filepath),
+        os.path.join(os.path.dirname(base_dir), "keywords", filepath),
+        os.path.join(os.path.dirname(os.path.dirname(base_dir)), "keywords", filepath),
+    ]
+    keywords = []
+    for path in candidates:
+        try:
+            if os.path.exists(path):
+                with open(path, "r", encoding="utf-8") as f:
+                    keywords = json.load(f)
+                    break
+        except Exception:
+            continue
     # Filter out generic keywords to reduce false positives
     generic_keywords = {
         "hello", "please", "form", "now", "open", "only",
@@ -18,7 +29,7 @@ def load_keywords_from_json(filepath: str) -> Set[str]:
         "नमस्ते", "कृपया", "प्रपत्र", "अब", "खोलना", "केवल",
         "नमस्ति", "कृपया", "प्रपत्रम्", "अद्य", "उद्घाटति", "केवलम्"
     }
-    return {kw.lower() for kw in keywords if kw.lower() not in generic_keywords}
+    return {kw.lower() for kw in keywords if isinstance(kw, str) and kw.lower() not in generic_keywords}
 
 # Load keywords for each language
 scam_keywords: Dict[str, Set[str]] = {
@@ -38,7 +49,7 @@ class StreamingConfig:
     chunk_seconds: float = 1.5
     overlap_seconds: float = 0.5
     # Multilingual model name for faster-whisper (ctranslate2)
-    model_name: str = "base"
+    model_name: str = "tiny"
     # Device/precision for faster-whisper; "metal" preferred on macOS, fallback auto/cpu
     device: str = "auto"  # one of: "metal", "cpu", "auto"
     compute_type: str = "int8"  # e.g., "int8", "int8_float16", "float16", "float32"

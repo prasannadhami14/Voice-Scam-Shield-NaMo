@@ -30,11 +30,11 @@ def run_command(command, cwd=None, shell=False):
         return False
 
 def check_backend_health():
-    """Check if backend is running."""
+    """Check if backend process is responding (do not depend on /health)."""
     try:
-        response = requests.get("http://localhost:8000/health", timeout=5)
+        response = requests.get("http://localhost:8000/", timeout=5)
         return response.status_code == 200
-    except:
+    except Exception:
         return False
 
 def install_dependencies():
@@ -67,7 +67,8 @@ def start_backend():
     
     # Start backend in a separate thread
     def run_backend():
-        run_command([sys.executable, "main.py"], cwd=str(backend_dir), shell=True)
+        # Prefer uvicorn to ensure proper ASGI startup
+        run_command([sys.executable, "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"], cwd=str(backend_dir), shell=False)
     
     backend_thread = threading.Thread(target=run_backend, daemon=True)
     backend_thread.start()

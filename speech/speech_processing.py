@@ -263,6 +263,22 @@ class RealTimeTranscriber:
         }
 
     def process_audio_chunk(self, audio_data: 'np.ndarray', language: str = 'en') -> dict:
+        """Synchronous wrapper for non-async contexts. Avoid in asyncio loops."""
+        try:
+            # If already inside an event loop, raise to prevent deadlock
+            try:
+                loop = asyncio.get_running_loop()
+                if loop.is_running():
+                    raise RuntimeError("process_audio_chunk called inside running event loop; use process_audio_chunk_async")
+            except RuntimeError:
+                # No running loop -> safe to create one
+                pass
+
+            return asyncio.run(self.process_audio_chunk_async(audio_data, language))
+        except Exception as e:
+            return {"risk": 0, "label": "Error", "rationale": str(e)}
+
+    async def process_audio_chunk_async(self, audio_data: 'np.ndarray', language: str = 'en') -> dict:
         try:
             import soundfile as sf
             import numpy as np
@@ -279,9 +295,7 @@ class RealTimeTranscriber:
                 temp_path = tmp.name
 
             # Transcribe
-            trans = asyncio.get_event_loop().run_until_complete(
-                self.speech_processor.transcribe_audio(temp_path, language)
-            )
+            trans = await self.speech_processor.transcribe_audio(temp_path, language)
 
             # Keyword analysis
             kw = self._score_keywords(trans.get('text', ''), trans.get('language', language))
