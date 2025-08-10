@@ -44,3 +44,9 @@ class StreamingConfig:
     compute_type: str = "int8"  # e.g., "int8", "int8_float16", "float16", "float32"
     use_fp16: bool = False
     duration_limit_seconds: float = 0.0
+    # If set, force transcription to this language code (e.g., "hi", "en")
+    force_language: str | None = None
+    # When True, automatically lock language based on script detection (e.g., Devanagari → "hi")
+    auto_language_lock: bool = True
+    # Threshold (0..1) of script ratio to trigger auto lock for a language (e.g., Devanagari for Hindi)
+    language_lock_script_threshold: float = 0.35

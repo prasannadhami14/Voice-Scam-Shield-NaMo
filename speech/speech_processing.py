@@ -62,6 +62,43 @@ class RealTimeTranscriber:
         return re.findall(r"\w+", text, flags=re.UNICODE)
 
     @staticmethod
+    def _script_ratios(text: str) -> Dict[str, float]:
+        """Approximate fraction of characters by script family (latin, greek, devanagari)."""
+        if not text:
+            return {"latin": 0.0, "greek": 0.0, "devanagari": 0.0}
+        total_letters = 0
+        counts = {"latin": 0, "greek": 0, "devanagari": 0}
+        for ch in text:
+            code = ord(ch)
+            # Basic Latin + Latin-1 Supplement + Latin Extended-A/B
+            if (0x0041 <= code <= 0x024F) or (0x1E00 <= code <= 0x1EFF):
+                counts["latin"] += 1
+                total_letters += 1
+            # Greek and Coptic
+            elif 0x0370 <= code <= 0x03FF:
+                counts["greek"] += 1
+                total_letters += 1
+            # Devanagari
+            elif 0x0900 <= code <= 0x097F:
+                counts["devanagari"] += 1
+                total_letters += 1
+        if total_letters == 0:
+            return {k: 0.0 for k in counts}
+        return {k: counts[k] / total_letters for k in counts}
+
+    def _maybe_lock_language(self, provisional_text: str, detected_language: str) -> str:
+        """Optionally lock language to 'hi' if Devanagari dominates and no forced language is set."""
+        if getattr(self.config, "force_language", None):
+            return self.config.force_language  # type: ignore
+        if not getattr(self.config, "auto_language_lock", True):
+            return detected_language
+        ratios = self._script_ratios(provisional_text)
+        threshold = getattr(self.config, "language_lock_script_threshold", 0.35)
+        if ratios.get("devanagari", 0.0) >= float(threshold):
+            return "hi"
+        return detected_language
+
+    @staticmethod
     def _has_negation(tokens: List[str], keyword_index: int, language: str, window: int = 6) -> bool:
         negations: Dict[str, Set[str]] = {
             "en": {"no", "not", "don't", "do", "never", "avoid"},
@@ -254,30 +291,54 @@ class RealTimeTranscriber:
             Dict with transcript, risk, label, rationale, and language.
         """
         try:
+            preferred_language = getattr(self.config, "force_language", None)
+            # First pass transcription (may be forced if user set it)
             if self._use_faster:
                 segments, info = self.model.transcribe(
                     audio_data,
-                    language=None,  # Auto-detect
+                    language=preferred_language,
                     beam_size=1,
                     temperature=0.0,
                     vad_filter=True,
                 )
-                text_parts = []
-                for seg in segments:
-                    text_parts.append(seg.text)
-                text = (" ".join(text_parts)).strip()
-                language = (info.language or "en")
+                text = (" ".join(seg.text for seg in segments)).strip()
+                language = (preferred_language or info.language or "en")
             else:
                 result = self.model.transcribe(
                     audio_data,
-                    language=None,  # Auto-detect language
+                    language=preferred_language,
                     fp16=self.config.use_fp16,
                     temperature=0.0,
                     condition_on_previous_text=False,
                     verbose=False,
                 )
                 text = (result.get("text") or "").strip()
-                language = result.get("language", "en")  # Fallback to English
+                language = preferred_language or result.get("language", "en")
+
+            # Optional re-transcribe if Hindi script detected but language isn't 'hi'
+            locked_language = self._maybe_lock_language(text, language)
+            if locked_language != language and not preferred_language:
+                if self._use_faster:
+                    segments, info = self.model.transcribe(
+                        audio_data,
+                        language=locked_language,
+                        beam_size=1,
+                        temperature=0.0,
+                        vad_filter=True,
+                    )
+                    text = (" ".join(seg.text for seg in segments)).strip()
+                    language = locked_language
+                else:
+                    result = self.model.transcribe(
+                        audio_data,
+                        language=locked_language,
+                        fp16=self.config.use_fp16,
+                        temperature=0.0,
+                        condition_on_previous_text=False,
+                        verbose=False,
+                    )
+                    text = (result.get("text") or "").strip()
+                    language = locked_language
             scam_result = self.detect_scam_keywords(text, language)
             return {
                 "transcript": text,
